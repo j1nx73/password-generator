@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Password Manager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h4><i class="fas fa-user-edit"></i> Profile Settings</h4>
+                <p class="mb-0">Manage your account information</p>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="profileForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-info-circle"></i> Account Information
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="form-control" id="username" name="username" 
+                                           value="{{ username }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           value="{{ email }}">
+                                </div>
+                                <div class="form-text">Email is optional</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-lock"></i> Password Change
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label for="current_password" class="form-label">Current Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                    <input type="password" class="form-control" id="current_password" 
+                                           name="current_password" required>
+                                </div>
+                                <div class="form-text">Required to make any changes</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="new_password" class="form-label">New Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="new_password" 
+                                           name="new_password" minlength="8">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleNewPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Leave blank to keep current password</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="confirm_password" 
+                                           name="confirm_password" minlength="8">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Account Statistics -->
+        <div class="card shadow mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Account Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="border-end">
+                            <h3 class="text-primary">{{ password_count or 0 }}</h3>
+                            <p class="text-muted mb-0">Saved Passwords</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border-end">
+                            <h3 class="text-success">{{ session.username|length }}</h3>
+                            <p class="text-muted mb-0">Username Length</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div>
+                            <h3 class="text-info">{{ email|length if email else 0 }}</h3>
+                            <p class="text-muted mb-0">Email Length</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Settings -->
+        <div class="card shadow mt-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-cog"></i> Password Generation Settings</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('update_settings') }}" id="settingsForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Default Password Settings</h6>
+                            
+                            <div class="mb-3">
+                                <label for="default_length" class="form-label">Default Password Length</label>
+                                <input type="number" class="form-control" id="default_length" name="default_password_length" 
+                                       value="{{ settings.default_password_length }}" min="4" max="128">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Default Character Types</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="default_uppercase" 
+                                           name="default_include_uppercase" value="1" 
+                                           {% if settings.default_include_uppercase %}checked{% endif %}>
+                                    <label class="form-check-label" for="default_uppercase">
+                                        Uppercase Letters (A-Z)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="default_lowercase" 
+                                           name="default_include_lowercase" value="1" 
+                                           {% if settings.default_include_lowercase %}checked{% endif %}>
+                                    <label class="form-check-label" for="default_lowercase">
+                                        Lowercase Letters (a-z)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="default_digits" 
+                                           name="default_include_digits" value="1" 
+                                           {% if settings.default_include_digits %}checked{% endif %}>
+                                    <label class="form-check-label" for="default_digits">
+                                        Numbers (0-9)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="default_symbols" 
+                                           name="default_include_symbols" value="1" 
+                                           {% if settings.default_include_symbols %}checked{% endif %}>
+                                    <label class="form-check-label" for="default_symbols">
+                                        Special Characters (!@#$%^&*)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Interface Settings</h6>
+                            
+                            <div class="mb-3">
+                                <label for="theme" class="form-label">Theme</label>
+                                <select class="form-select" id="theme" name="theme">
+                                    <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>Light</option>
+                                    <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>Dark</option>
+                                    <option value="auto" {% if settings.theme == 'auto' %}selected{% endif %}>Auto (System)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="auto_logout" class="form-label">Auto Logout (minutes)</label>
+                                <input type="number" class="form-control" id="auto_logout" name="auto_logout_minutes" 
+                                       value="{{ settings.auto_logout_minutes }}" min="5" max="480">
+                                <div class="form-text">Set to 0 to disable auto logout</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save"></i> Save Settings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Toggle password visibility
+function togglePasswordVisibility(inputId, buttonId) {
+    const input = document.getElementById(inputId);
+    const button = document.getElementById(buttonId);
+    const icon = button.querySelector('i');
+    
+    button.addEventListener('click', function() {
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+}
+
+togglePasswordVisibility('new_password', 'toggleNewPassword');
+togglePasswordVisibility('confirm_password', 'toggleConfirmPassword');
+
+// Form validation
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    const newPassword = document.getElementById('new_password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    const currentPassword = document.getElementById('current_password').value;
+    
+    if (!currentPassword) {
+        e.preventDefault();
+        alert('Current password is required');
+        return;
+    }
+    
+    if (newPassword && newPassword.length < 8) {
+        e.preventDefault();
+        alert('New password must be at least 8 characters long');
+        return;
+    }
+    
+    if (newPassword && newPassword !== confirmPassword) {
+        e.preventDefault();
+        alert('New passwords do not match');
+        return;
+    }
+});
+</script>
+{% endblock %} 

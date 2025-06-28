@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Password Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-home"></i> Welcome, {{ username }}!
+        </h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-key fa-3x mb-3"></i>
+                <h5>Generate Password</h5>
+                <p class="mb-0">Create secure passwords</p>
+                <a href="{{ url_for('generate_password') }}" class="btn btn-light btn-sm mt-2">
+                    <i class="fas fa-plus"></i> Generate
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-save fa-3x mb-3"></i>
+                <h5>Save Password</h5>
+                <p class="mb-0">Store new credentials</p>
+                <a href="{{ url_for('save_password') }}" class="btn btn-light btn-sm mt-2">
+                    <i class="fas fa-plus"></i> Save
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-eye fa-3x mb-3"></i>
+                <h5>View Passwords</h5>
+                <p class="mb-0">Manage your vault</p>
+                <a href="{{ url_for('view_passwords') }}" class="btn btn-light btn-sm mt-2">
+                    <i class="fas fa-eye"></i> View
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x mb-3"></i>
+                <h5>Check Strength</h5>
+                <p class="mb-0">Test password security</p>
+                <a href="{{ url_for('check_strength') }}" class="btn btn-light btn-sm mt-2">
+                    <i class="fas fa-check"></i> Check
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h3 class="text-primary">{{ password_count }}</h3>
+                        <p class="text-muted">Saved Passwords</p>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">100%</h3>
+                        <p class="text-muted">Security Level</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('generate_multiple') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-layer-group"></i> Generate Multiple Passwords
+                    </a>
+                    <a href="{{ url_for('search_passwords') }}" class="btn btn-outline-info">
+                        <i class="fas fa-search"></i> Search Passwords
+                    </a>
+                    <a href="{{ url_for('export_passwords') }}" class="btn btn-outline-success">
+                        <i class="fas fa-download"></i> Export Passwords
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-shield-alt"></i> Security Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                            <div>
+                                <h6>Use Strong Passwords</h6>
+                                <p class="text-muted small">Generate passwords with uppercase, lowercase, numbers, and symbols.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                            <div>
+                                <h6>Unique for Each Site</h6>
+                                <p class="text-muted small">Never reuse passwords across different websites or services.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                            <div>
+                                <h6>Regular Updates</h6>
+                                <p class="text-muted small">Change your passwords regularly, especially for important accounts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
