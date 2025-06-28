@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Check Password Strength - Password Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-chart-line"></i> Check Password Strength</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="strengthForm">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Enter Password to Check</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" 
+                                   value="{{ password if password else '' }}" 
+                                   placeholder="Enter your password here..." 
+                                   oninput="checkStrength()">
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility()">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">Your password will be analyzed for security strength</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Analyze Password
+                        </button>
+                    </div>
+                </form>
+                
+                {% if strength %}
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-chart-bar"></i> Strength Analysis</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Overall Strength</label>
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-{{ 'danger' if strength.strength == 'Weak' else 'warning' if strength.strength == 'Medium' else 'info' if strength.strength == 'Strong' else 'success' }}" 
+                                     style="width: {{ (strength.score / strength.max_score) * 100 }}%">
+                                    {{ strength.score }}/{{ strength.max_score }}
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-{{ 'danger' if strength.strength == 'Weak' else 'warning' if strength.strength == 'Medium' else 'info' if strength.strength == 'Strong' else 'success' }} fs-6">
+                                    {{ strength.strength }}
+                                </span>
+                                <small class="text-muted">{{ strength.score }}/{{ strength.max_score }} points</small>
+                            </div>
+                        </div>
+                        
+                        {% if strength.feedback %}
+                        <div class="mb-3">
+                            <label class="form-label">Suggestions for Improvement</label>
+                            <ul class="list-group list-group-flush">
+                                {% for suggestion in strength.feedback %}
+                                <li class="list-group-item">
+                                    <i class="fas fa-info-circle text-info"></i> {{ suggestion }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> Great password! No suggestions needed.
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-info-circle"></i> Password Details</h5>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Length:</strong></p>
+                                        <p class="mb-1"><strong>Characters:</strong></p>
+                                        <p class="mb-1"><strong>Uppercase:</strong></p>
+                                        <p class="mb-1"><strong>Lowercase:</strong></p>
+                                        <p class="mb-1"><strong>Numbers:</strong></p>
+                                        <p class="mb-1"><strong>Symbols:</strong></p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="mb-1">{{ password|length }}</p>
+                                        <p class="mb-1">{{ password|length }}</p>
+                                        <p class="mb-1">{{ password|select|map('upper')|list|length }}</p>
+                                        <p class="mb-1">{{ password|select|map('lower')|list|length }}</p>
+                                        <p class="mb-1">{{ password|select|map('int')|list|length }}</p>
+                                        <p class="mb-1">{{ password|select|map('string')|list|length }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6><i class="fas fa-shield-alt"></i> Security Tips</h6>
+                            <ul class="list-unstyled small">
+                                <li><i class="fas fa-check text-success"></i> Use at least 12 characters</li>
+                                <li><i class="fas fa-check text-success"></i> Mix uppercase and lowercase</li>
+                                <li><i class="fas fa-check text-success"></i> Include numbers and symbols</li>
+                                <li><i class="fas fa-check text-success"></i> Avoid common patterns</li>
+                                <li><i class="fas fa-check text-success"></i> Don't reuse passwords</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePasswordVisibility() {
+    const passwordField = document.getElementById('password');
+    const icon = document.getElementById('toggleIcon');
+    
+    if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordField.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+function checkStrength() {
+    const password = document.getElementById('password').value;
+    
+    if (password.length > 0) {
+        // Send AJAX request to check strength
+        fetch('/api/check_strength', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ password: password })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.strength) {
+                updateStrengthDisplay(data.strength);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+}
+
+function updateStrengthDisplay(strength) {
+    // This would update the strength display in real-time
+    // For now, we'll just show the form submission works
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Password - Password Manager{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-key"></i> Generate Secure Password</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="generateForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="length" class="form-label">Password Length</label>
+                                <input type="range" class="form-range" id="length" name="length" min="4" max="50" value="{{ form_data.length if form_data else 12 }}" oninput="updateLengthValue()">
+                                <div class="d-flex justify-content-between">
+                                    <small>4</small>
+                                    <small id="lengthValue">{{ form_data.length if form_data else 12 }}</small>
+                                    <small>50</small>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Character Types</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="uppercase" name="uppercase" {{ 'checked' if not form_data or form_data.uppercase else '' }}>
+                                    <label class="form-check-label" for="uppercase">
+                                        <i class="fas fa-font"></i> Uppercase Letters (A-Z)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="lowercase" name="lowercase" {{ 'checked' if not form_data or form_data.lowercase else '' }}>
+                                    <label class="form-check-label" for="lowercase">
+                                        <i class="fas fa-font"></i> Lowercase Letters (a-z)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="digits" name="digits" {{ 'checked' if not form_data or form_data.digits else '' }}>
+                                    <label class="form-check-label" for="digits">
+                                        <i class="fas fa-hashtag"></i> Numbers (0-9)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="symbols" name="symbols" {{ 'checked' if not form_data or form_data.symbols else '' }}>
+                                    <label class="form-check-label" for="symbols">
+                                        <i class="fas fa-asterisk"></i> Special Characters (!@#$%^&*)
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="exclude_ambiguous" name="exclude_ambiguous" {{ 'checked' if form_data and form_data.exclude_ambiguous else '' }}>
+                                    <label class="form-check-label" for="exclude_ambiguous">
+                                        <i class="fas fa-ban"></i> Exclude Ambiguous Characters (0, O, l, 1)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-magic"></i> Generate Password
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {% if password %}
+                            <div class="mb-3">
+                                <label class="form-label">Generated Password</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="generatedPassword" value="{{ password }}" readonly>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="copyPassword()">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility()">
+                                        <i class="fas fa-eye" id="toggleIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {% if strength %}
+                            <div class="mb-3">
+                                <label class="form-label">Password Strength</label>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-{{ 'danger' if strength.strength == 'Weak' else 'warning' if strength.strength == 'Medium' else 'info' if strength.strength == 'Strong' else 'success' }}" 
+                                         style="width: {{ (strength.score / strength.max_score) * 100 }}%">
+                                        {{ strength.score }}/{{ strength.max_score }}
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">{{ strength.strength }}</small>
+                                    <small class="text-muted">{{ strength.score }}/{{ strength.max_score }} points</small>
+                                </div>
+                            </div>
+                            
+                            {% if strength.feedback %}
+                            <div class="mb-3">
+                                <label class="form-label">Suggestions</label>
+                                <ul class="list-unstyled">
+                                    {% for suggestion in strength.feedback %}
+                                    <li><i class="fas fa-info-circle text-info"></i> {{ suggestion }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                            {% endif %}
+                            
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-lightbulb"></i> Tips</h6>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="fas fa-check text-success"></i> Use at least 12 characters</li>
+                                        <li><i class="fas fa-check text-success"></i> Include all character types</li>
+                                        <li><i class="fas fa-check text-success"></i> Avoid common patterns</li>
+                                        <li><i class="fas fa-check text-success"></i> Make it unique for each site</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                {% if password %}
+                <hr>
+                <div class="text-center">
+                    <a href="{{ url_for('save_password') }}?password={{ password }}" class="btn btn-success">
+                        <i class="fas fa-save"></i> Save This Password
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateLengthValue() {
+    const slider = document.getElementById('length');
+    const value = document.getElementById('lengthValue');
+    value.textContent = slider.value;
+}
+
+function copyPassword() {
+    const passwordField = document.getElementById('generatedPassword');
+    passwordField.select();
+    passwordField.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    
+    // Show feedback
+    const button = event.target.closest('button');
+    const icon = button.querySelector('i');
+    icon.classList.remove('fa-copy');
+    icon.classList.add('fa-check');
+    button.classList.remove('btn-outline-secondary');
+    button.classList.add('btn-success');
+    
+    setTimeout(() => {
+        icon.classList.remove('fa-check');
+        icon.classList.add('fa-copy');
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+    }, 2000);
+}
+
+function togglePasswordVisibility() {
+    const passwordField = document.getElementById('generatedPassword');
+    const icon = document.getElementById('toggleIcon');
+    
+    if (passwordField.type === 'text') {
+        passwordField.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    } else {
+        passwordField.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    }
+}
+
+// Form validation
+document.getElementById('generateForm').addEventListener('submit', function(e) {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:not(#exclude_ambiguous)');
+    const checked = Array.from(checkboxes).some(cb => cb.checked);
+    
+    if (!checked) {
+        e.preventDefault();
+        alert('Please select at least one character type!');
+        return;
+    }
+});
+</script>
+{% endblock %} 
